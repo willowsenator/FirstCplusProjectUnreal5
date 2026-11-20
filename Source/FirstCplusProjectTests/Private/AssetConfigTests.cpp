@@ -1,5 +1,7 @@
 #include "Misc/AutomationTest.h"
 
+#include "CombatTestHelpers.h"
+
 #include "Blueprint/UserWidget.h"
 #include "FirstCplusProject/GameplayActors/Enemy.h"
 #include "FirstCplusProject/GameplayActors/MainCharacter.h"
@@ -69,6 +71,30 @@ bool FFirstCplusProjectTests_MainPlayerControllerBP_HasRequiredAssetSlots::RunTe
 	TestNotNull(TEXT("HUDOverlayAsset is set"), Default->HUDOverlayAsset.Get());
 	TestNotNull(TEXT("WEnemyHealthBar is set"), Default->WEnemyHealthBar.Get());
 
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_EnemyHealthBar_CreateWidget, "FirstCplusProject.Tests.AssetConfig.EnemyHealthBarWidget",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_EnemyHealthBar_CreateWidget::RunTest(const FString& Parameters)
+{
+	UClass* WidgetClass = LoadClass<UUserWidget>(nullptr, TEXT("/Game/GameProject/HUD/EnemyHealthBar.EnemyHealthBar_C"));
+	if (!TestNotNull(TEXT("EnemyHealthBar_C loads"), WidgetClass))
+	{
+		return false;
+	}
+
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld(true);
+	if (!TestNotNull(TEXT("fixture world exists"), Fixture.World))
+	{
+		return false;
+	}
+
+	UUserWidget* Widget = CreateWidget<UUserWidget>(Fixture.World, WidgetClass);
+	TestNotNull(TEXT("EnemyHealthBar instantiates"), Widget);
+
+	Fixture.Destroy();
 	return true;
 }
 

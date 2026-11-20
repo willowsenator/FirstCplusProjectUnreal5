@@ -7,7 +7,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 
-FCombatWorldFixture FCombatWorldFixture::MakeCombatWorld(const bool bWithGameMode)
+FCombatWorldFixture FCombatWorldFixture::MakeCombatWorld(const bool bWithGameMode, const TSubclassOf<AEnemy> EnemyClass)
 {
 	FCombatWorldFixture Fixture;
 
@@ -40,7 +40,8 @@ FCombatWorldFixture FCombatWorldFixture::MakeCombatWorld(const bool bWithGameMod
 	Fixture.World = World;
 	Fixture.MainCharacter = World->SpawnActor<AMainCharacter>(
 		FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-	Fixture.Enemy = World->SpawnActor<AEnemy>(FVector(500.f, 0.f, 0.f), FRotator::ZeroRotator, SpawnParams);
+	Fixture.Enemy = World->SpawnActor<AEnemy>(
+			EnemyClass ? EnemyClass.Get() : AEnemy::StaticClass(), FVector(500.f, 0.f, 0.f), FRotator::ZeroRotator, SpawnParams);
 	Fixture.PlayerController = World->SpawnActor<AMainPlayerController>(
 		FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 	
