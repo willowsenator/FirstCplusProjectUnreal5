@@ -3,6 +3,9 @@
 #include "FirstCplusProject/GameplayActors/Enemy.h"
 #include "FirstCplusProject/GameplayActors/MainCharacter.h"
 #include "FirstCplusProject/GameplayActors/Weapon.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -61,6 +64,57 @@ bool FFirstCplusProjectTests_DeadEnemyTakesNoDamage::RunTest(const FString& Para
 	TestEqual(TEXT("A dead enemy reports no damage applied"), Applied, 0.f);
 	TestEqual(TEXT("Health stays at zero"), Fixture.Enemy->Health, 0.f);
 	TestFalse(TEXT("Enemy is still dead"), Fixture.Enemy->Alive());
+
+	Fixture.Destroy();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_DieSurvivesNullComponents, "FirstCplusProject.Tests.Enemy.Die.SurvivesNullComponents",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_DieSurvivesNullComponents::RunTest(const FString& Parameters)
+{
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld();
+	if (!TestNotNull(TEXT("Enemy spawned"), Fixture.Enemy))
+	{
+		Fixture.Destroy();
+		return false;
+	}
+
+	Fixture.Enemy->CombatCollision = nullptr;
+	Fixture.Enemy->AgroSphere = nullptr;
+	Fixture.Enemy->CombatSphere = nullptr;
+
+	Fixture.Enemy->DecreaseHealth(LethalDamage);
+
+	TestFalse(TEXT("Enemy dies even with its collision components missing"), Fixture.Enemy->Alive());
+	TestEqual(TEXT("Dead enemy cannot move"), Fixture.Enemy->GetCharacterMovement()->MovementMode.GetValue(), MOVE_None);
+
+	Fixture.Destroy();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_DieDisablesCollision, "FirstCplusProject.Tests.Enemy.Die.DisablesCollision",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_DieDisablesCollision::RunTest(const FString& Parameters)
+{
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld();
+	if (!TestNotNull(TEXT("Enemy spawned"), Fixture.Enemy)
+		|| !TestNotNull(TEXT("CombatCollision exists"), Fixture.Enemy->CombatCollision)
+		|| !TestNotNull(TEXT("AgroSphere exists"), Fixture.Enemy->AgroSphere)
+		|| !TestNotNull(TEXT("CombatSphere exists"), Fixture.Enemy->CombatSphere))
+	{
+		Fixture.Destroy();
+		return false;
+	}
+
+	Fixture.Enemy->DecreaseHealth(LethalDamage);
+
+	TestEqual(TEXT("Dead enemy's weapon hit volume is off"), Fixture.Enemy->CombatCollision->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+	TestEqual(TEXT("Dead enemy no longer detects the player"), Fixture.Enemy->AgroSphere->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+	TestEqual(TEXT("Dead enemy no longer starts attacks"), Fixture.Enemy->CombatSphere->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+	TestEqual(TEXT("Dead enemy's capsule is off"), Fixture.Enemy->GetCapsuleComponent()->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
 
 	Fixture.Destroy();
 	return true;

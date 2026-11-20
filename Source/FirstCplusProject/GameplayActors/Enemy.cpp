@@ -107,9 +107,18 @@ void AEnemy::Die()
 		DeathEndFallbackDelay);
 	
 	SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Dead);
-	CombatCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	AgroSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CombatSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (CombatCollision)
+	{
+		CombatCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (AgroSphere)
+	{
+		AgroSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (CombatSphere)
+	{
+		CombatSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
