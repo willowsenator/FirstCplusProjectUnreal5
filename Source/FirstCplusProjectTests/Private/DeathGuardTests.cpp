@@ -1,4 +1,5 @@
 #include "CombatTestHelpers.h"
+#include "TakeDamageListener.h"
 #include "FirstCplusProject/GameplayActors/Enemy.h"
 #include "FirstCplusProject/GameplayActors/MainCharacter.h"
 #include "FirstCplusProject/GameplayActors/Weapon.h"
@@ -6,6 +7,7 @@
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Misc/AutomationTest.h"
+#include "UObject/StrongObjectPtr.h"
 
 namespace
 {
@@ -130,6 +132,36 @@ bool FFirstCplusProjectTests_DeadPlayerAttackIsRefused::RunTest(const FString& P
 	TestFalse(TEXT("A dead player with a weapon does not start an attack"), Fixture.MainCharacter->bAttacking);
 	TestFalse(TEXT("A dead player does not turn toward a target"), Fixture.MainCharacter->bInterpToEnemy);
 
+	Fixture.Destroy();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_DeadPlayerTakesNoDamage, "FirstCplusProject.Tests.MainCharacter.TakeDamage.IgnoredWhenDead",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_DeadPlayerTakesNoDamage::RunTest(const FString& Parameters)
+{
+	// A game mode is required, otherwise APawn::TakeDamage returns 0 and the test would pass vacuously.
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld(true);
+	if (!TestNotNull(TEXT("MainCharacter spawned"), Fixture.MainCharacter))
+	{
+		Fixture.Destroy();
+		return false;
+	}
+
+	Fixture.MainCharacter->DecreaseHealth(LethalDamage);
+	TestTrue(TEXT("Player is dead after lethal damage"), Fixture.MainCharacter->bIsDead);
+
+	TStrongObjectPtr<UTakeDamageListener> Listener(NewObject<UTakeDamageListener>());
+	Fixture.MainCharacter->OnTakeAnyDamage.AddDynamic(Listener.Get(), &UTakeDamageListener::OnDamage);
+
+	const float Applied = Fixture.MainCharacter->TakeDamage(5.f, FDamageEvent(), nullptr, nullptr);
+
+	TestEqual(TEXT("A dead player reports no damage applied"), Applied, 0.f);
+	TestFalse(TEXT("A dead player broadcasts no damage event"), Listener->bFired);
+	TestEqual(TEXT("Health stays at zero"), Fixture.MainCharacter->Health, 0.f);
+
+	Fixture.MainCharacter->OnTakeAnyDamage.RemoveDynamic(Listener.Get(), &UTakeDamageListener::OnDamage);
 	Fixture.Destroy();
 	return true;
 }

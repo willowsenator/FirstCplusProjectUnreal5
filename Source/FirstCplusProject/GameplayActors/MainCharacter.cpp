@@ -144,6 +144,11 @@ void AMainCharacter::Die()
 float AMainCharacter::TakeDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	AActor* DamageCauser)
 {
+	if (bIsDead)
+	{
+		return 0.f;
+	}
+
 	const float AppliedDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	DecreaseHealth(AppliedDamage);
 	return AppliedDamage;
