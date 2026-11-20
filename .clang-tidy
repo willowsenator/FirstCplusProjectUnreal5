@@ -1,0 +1,3 @@
+# Off: bugprone-throwing-static-initialization (IMPLEMENT_SIMPLE_AUTOMATION_TEST creates a static test instance per test) and
+# clang-analyzer-optin.core.EnumCastOutOfRange (engine flag enums such as EObjectFlags are bitmasks, so combined values are valid).
+Checks: '-*,bugprone-*,-bugprone-throwing-static-initialization,clang-analyzer-*,-clang-analyzer-optin.core.EnumCastOutOfRange'
