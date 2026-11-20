@@ -9,7 +9,7 @@ namespace
 		return Name.ToString().Replace(TEXT(" "), TEXT(""));
 	}
 
-	bool MontageHasNotifyOnSection(const UAnimMontage* Montage, const FName Section, const FName NotifyName)
+	bool MontageHasNotifyOnSection(const UAnimMontage* Montage, const FName Section, const FString& NotifyName)
 	{
 		if (!Montage)
 		{
@@ -26,7 +26,7 @@ namespace
 		float End = 0.f;
 		Montage->GetSectionStartAndEndTime(SectionIndex, Start, End);
 
-		const FString Wanted = NormalizeNotifyName(NotifyName);
+		const FString Wanted = NotifyName.Replace(TEXT(" "), TEXT(""));
 		for (const FAnimNotifyEvent& Event : Montage->Notifies)
 		{
 			const float Time = Event.GetTriggerTime();
