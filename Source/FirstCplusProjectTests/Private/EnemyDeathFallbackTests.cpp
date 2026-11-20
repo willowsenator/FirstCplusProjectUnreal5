@@ -46,6 +46,37 @@ bool FFirstCplusProjectTests_EnemyDestroyedWithoutNotify::RunTest(const FString&
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_EnemyBPDestroyedWithoutNotify, "FirstCplusProject.Tests.Enemy.Death.BPSubclass.DestroysBPActor_EvenWithoutNotify",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_EnemyBPDestroyedWithoutNotify::RunTest(const FString& Parameters)
+{
+	const TSubclassOf<AEnemy> EnemyBP = LoadClass<AEnemy>(nullptr, TEXT("/Game/GameProject/Enemies/Troll/Enemy_BP.Enemy_BP_C"));
+	if (!TestNotNull(TEXT("Enemy_BP_C loads"), EnemyBP.Get()))
+	{
+		return false;
+	}
+
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld(false, EnemyBP);
+	if (!TestNotNull(TEXT("BP enemy spawned"), Fixture.Enemy))
+	{
+		Fixture.Destroy();
+		return false;
+	}
+
+	Fixture.Enemy->DeathDelay = 1.f;
+	Fixture.Enemy->DeathEndFallbackDelay = 5.f;
+	const float TimingMargin = Fixture.Enemy->DeathDelay * 0.2f;
+	Fixture.Enemy->Die();
+	AdvanceWorld(Fixture.World, Fixture.Enemy->DeathEndFallbackDelay - TimingMargin);
+	TestTrue(TEXT("BP enemy still valid before the fallback deadline, so no notify destroyed it early"), IsValid(Fixture.Enemy));
+	AdvanceWorld(Fixture.World, 2.f * TimingMargin + Fixture.Enemy->DeathDelay);
+	TestFalse(TEXT("BP enemy destroyed by the fallback timer when no DeathEnd notify arrives"), IsValid(Fixture.Enemy));
+
+	Fixture.Destroy();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_EnemyNotifyPathDestroysOnce, "FirstCplusProject.Tests.Enemy.Death.NotifyPathDestroysOnce",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 

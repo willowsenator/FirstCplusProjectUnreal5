@@ -34,6 +34,40 @@ bool FFirstCplusProjectTests_EnemyDamageFiresOnTakeAnyDamage::RunTest(const FStr
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_TakeDamage_BPSubclass_FiresOnTakeAnyDamage, "FirstCplusProject.Tests.Enemy.TakeDamage.BPSubclass.FiresOnTakeAnyDamage",
+                                 EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FFirstCplusProjectTests_TakeDamage_BPSubclass_FiresOnTakeAnyDamage::RunTest(const FString& Parameters)
+{
+	const TSubclassOf<AEnemy> EnemyBP = LoadClass<AEnemy>(nullptr, TEXT("/Game/GameProject/Enemies/Troll/Enemy_BP.Enemy_BP_C"));
+	if (!TestNotNull(TEXT("Enemy_BP_C loads"), EnemyBP.Get()))
+	{
+		return false;
+	}
+
+	FCombatWorldFixture Fixture = FCombatWorldFixture::MakeCombatWorld(true, EnemyBP);
+	if (!TestNotNull(TEXT("BP enemy spawned"), Fixture.Enemy))
+	{
+		Fixture.Destroy();
+		return false;
+	}
+	TestTrue(TEXT("Spawned enemy is the Blueprint subclass"), Fixture.Enemy->GetClass() == EnemyBP.Get());
+
+	TStrongObjectPtr<UTakeDamageListener> Listener(NewObject<UTakeDamageListener>());
+	Fixture.Enemy->OnTakeAnyDamage.AddDynamic(Listener.Get(), &UTakeDamageListener::OnDamage);
+
+	const float HealthBefore = Fixture.Enemy->Health;
+	const float Applied = UGameplayStatics::ApplyDamage(Fixture.Enemy, 10.f, nullptr, nullptr, UDamageType::StaticClass());
+
+	TestTrue(TEXT("OnTakeAnyDamage fires when damage is applied"), Listener->bFired);
+	TestEqual(TEXT("The damage reported as applied is the damage dealt"), Applied, 10.f);
+	TestEqual(TEXT("Health drops by the applied damage"), Fixture.Enemy->Health, HealthBefore - Applied);
+
+	Fixture.Enemy->OnTakeAnyDamage.RemoveDynamic(Listener.Get(), &UTakeDamageListener::OnDamage);
+	Fixture.Destroy();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFirstCplusProjectTests_MainCharacterDamageFiresOnTakeAnyDamage, "FirstCplusProject.Tests.MainCharacter.TakeDamage.FiresOnTakeAnyDamage",
                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
