@@ -15,10 +15,12 @@ class UTakeDamageListener : public UObject
 
 public:
 	bool bFired = false;
+	AController* LastInstigatedBy = nullptr;
 
 	UFUNCTION()
 	void OnDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 	{
 		bFired = true;
+		LastInstigatedBy = InstigatedBy;
 	}
 };

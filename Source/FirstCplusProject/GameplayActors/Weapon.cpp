@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h" // for UStaticMeshComponent declarations
 #include "Engine/SkeletalMeshSocket.h" // for USkeletalMeshSocket
 #include "GameFramework/DamageType.h"
+#include "GameFramework/Pawn.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -137,8 +138,17 @@ void AWeapon::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 			UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
 		}
 		
-		UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
+		UGameplayStatics::ApplyDamage(Enemy, Damage, ResolveInstigator(), this, DamageTypeClass);
 	}
+}
+
+AController* AWeapon::ResolveInstigator() const
+{
+	if (const APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+	{
+		return OwnerPawn->GetController();
+	}
+	return WeaponInstigator;
 }
 
 void AWeapon::CombatOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
