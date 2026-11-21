@@ -231,16 +231,6 @@ void AMainCharacter::Tick(const float DeltaTime)
 	}
 	
 	InterpToEnemy();
-	
-	if (CombatTarget)
-	{
-		CombatTargetLocation = CombatTarget->GetActorLocation();
-		
-		if (MainPlayerController)
-		{
-			MainPlayerController->EnemyLocation = CombatTargetLocation;
-		}
-	}
 }
 
 void AMainCharacter::InterpToEnemy()
