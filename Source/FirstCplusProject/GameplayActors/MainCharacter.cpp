@@ -140,8 +140,7 @@ void AMainCharacter::Die()
 		AnimInstance->Montage_JumpToSection(FName("Death"), CombatMontage);
 	}
 
-	// TODO: Trigger respawn timer
-	// TODO: Notify GameMode
+	// TODO(#43): Notify the GameMode and trigger a respawn timer
 }
 
 float AMainCharacter::TakeDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
