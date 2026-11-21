@@ -77,8 +77,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float MinSprintStamina;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float InterpSpeed;
-	bool  bInterpToEnemy;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	bool bInterpToEnemy;
 	void SetInterpToEnemy(bool Interp);
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
