@@ -332,43 +332,36 @@ void AEnemy::MoveToTarget(const APawn* Target)
 
 void AEnemy::Attack()
 {
-	if (Alive())
+	if (!Alive() || !bOverlappingCombatSphere || !CombatTarget) return;
+
+	if (AIController)
 	{
-		if (!bOverlappingCombatSphere || !CombatTarget) return;
-	
-		if (AIController)
-		{
-			AIController->StopMovement();
-			SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attacking);
-		}
+		AIController->StopMovement();
+		SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attacking);
+	}
 
-		// Turn to face the combat target
-		if (CombatTarget)
-		{
-			const FVector DirectionToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-			const FRotator RotationToTarget = DirectionToTarget.Rotation();
-			SetActorRotation(FRotator(0.0f, RotationToTarget.Yaw, 0.0f));
-		}
+	// Turn to face the combat target
+	const FVector DirectionToTarget = (CombatTarget->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	const FRotator RotationToTarget = DirectionToTarget.Rotation();
+	SetActorRotation(FRotator(0.0f, RotationToTarget.Yaw, 0.0f));
 
-		if (bCanAttack)
-		{
-			bCanAttack = false;
-			bAttackEndHandled = false;
-			if (UAnimInstance *AnimInstance = GetMesh()->GetAnimInstance(); AnimInstance && CombatMontage)
-			{
-				AnimInstance->Montage_Play(CombatMontage, 1.35f);
-				AnimInstance->Montage_JumpToSection(FName("Attack"), CombatMontage);
+	if (!bCanAttack) return;
 
-				// Bind the montage end callback so AttackEnd() gets called when montage finishes
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
-				AnimInstance->Montage_SetEndDelegate(EndDelegate, CombatMontage);
-			
-				if (SwingSound)
-				{
-					UGameplayStatics::PlaySound2D(this, SwingSound);
-				}
-			}
+	bCanAttack = false;
+	bAttackEndHandled = false;
+	if (UAnimInstance *AnimInstance = GetMesh()->GetAnimInstance(); AnimInstance && CombatMontage)
+	{
+		AnimInstance->Montage_Play(CombatMontage, 1.35f);
+		AnimInstance->Montage_JumpToSection(FName("Attack"), CombatMontage);
+
+		// Bind the montage end callback so AttackEnd() gets called when montage finishes
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AEnemy::OnAttackMontageEnded);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, CombatMontage);
+
+		if (SwingSound)
+		{
+			UGameplayStatics::PlaySound2D(this, SwingSound);
 		}
 	}
 }
@@ -441,7 +434,7 @@ void AEnemy::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		}
 		
 		
-		// Apply Dame to MainCharacter
+		// Apply Damage to MainCharacter
 		UGameplayStatics::ApplyDamage(MainCharacter, Damage, AIController, this, DamageTypeClass);
 	}
 }
