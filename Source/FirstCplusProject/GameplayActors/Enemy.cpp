@@ -10,6 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/DamageType.h"
 #include "Kismet/GameplayStatics.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Sound/SoundCue.h"
@@ -43,6 +44,7 @@ AEnemy::AEnemy()
 	Health = 75.f;
 	MaxHealth = 100.f;
 	Damage = 10.f;
+	DamageTypeClass = UDamageType::StaticClass();
 	
 	AttackMinTime = .5f;
 	AttackMaxTime = 3.5f;
@@ -440,10 +442,7 @@ void AEnemy::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		
 		
 		// Apply Dame to MainCharacter
-		if (DamageTypeClass)
-		{
-			UGameplayStatics::ApplyDamage(MainCharacter, Damage, AIController, this, DamageTypeClass);
-		}
+		UGameplayStatics::ApplyDamage(MainCharacter, Damage, AIController, this, DamageTypeClass);
 	}
 }
 
