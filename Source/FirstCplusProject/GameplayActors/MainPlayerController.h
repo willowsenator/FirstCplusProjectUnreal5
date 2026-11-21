@@ -29,6 +29,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UUserWidget* EnemyHealthBar;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Widgets")
 	bool bEnemyHealthBarVisible = false;
 	
 	FVector EnemyLocation;
