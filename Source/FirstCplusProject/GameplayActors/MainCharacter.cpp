@@ -175,14 +175,24 @@ void AMainCharacter::DeathEnd() const
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	MainPlayerController = Cast<AMainPlayerController>(GetController());
 
 	if (CombatMontage)
 	{
 		ensureMsgf(MontageHasCollisionNotifies(CombatMontage),
 			TEXT("AMainCharacter::CombatMontage is missing ActivateCollision and/or DeactivateCollision notifies — hit volume will never toggle"));
 	}
+}
+
+void AMainCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	MainPlayerController = Cast<AMainPlayerController>(NewController);
+}
+
+void AMainCharacter::UnPossessed()
+{
+	Super::UnPossessed();
+	MainPlayerController = nullptr;
 }
 
 bool AMainCharacter::MontageHasCollisionNotifies(const UAnimMontage* Montage)

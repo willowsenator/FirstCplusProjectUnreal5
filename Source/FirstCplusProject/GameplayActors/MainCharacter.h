@@ -202,6 +202,9 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Keep the cached player controller in step with possession changes
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void UnPossessed() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

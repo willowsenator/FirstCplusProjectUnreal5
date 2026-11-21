@@ -71,8 +71,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat")
 	TSubclassOf<UDamageType> DamageTypeClass;
 
+	/** Fallback used only when the weapon has no owner pawn; otherwise hits are credited to the owner's current controller. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat")
 	AController* WeaponInstigator;
 	
 	FORCEINLINE void SetWeaponInstigator(AController* InInstigator) { WeaponInstigator = InInstigator; }
+
+private:
+	/** The controller to credit for a hit: the owner pawn's current controller, or the cached hint when the owner is not a pawn. */
+	AController* ResolveInstigator() const;
 };
