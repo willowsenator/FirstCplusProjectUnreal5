@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h" // for UStaticMeshComponent declarations
 #include "Engine/SkeletalMeshSocket.h" // for USkeletalMeshSocket
+#include "GameFramework/DamageType.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -27,6 +28,7 @@ AWeapon::AWeapon()
 	WeaponState = EWeaponState::Ews_Pickup;
 	
 	Damage = 25.f;
+	DamageTypeClass = UDamageType::StaticClass();
 }
 
 void AWeapon::BeginPlay()
@@ -135,10 +137,7 @@ void AWeapon::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAc
 			UGameplayStatics::PlaySound2D(this, Enemy->HitSound);
 		}
 		
-		if (DamageTypeClass)
-		{
-			UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
-		}
+		UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
 	}
 }
 
