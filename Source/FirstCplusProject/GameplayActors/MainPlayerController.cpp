@@ -56,26 +56,24 @@ void AMainPlayerController::RemoveEnemyHealthBar()
 void AMainPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (EnemyHealthBar)
+    // A hidden bar needs no repositioning: RemoveEnemyHealthBar already hid the widget.
+    if (!EnemyHealthBar || !bEnemyHealthBarVisible)
     {
-        FVector2D PositionInViewport = FVector2D::ZeroVector;
-        if (!ProjectWorldLocationToScreen(EnemyLocation, PositionInViewport))
-        {
-            // The enemy is behind the camera: hide the bar rather than place it from an unset position.
-            EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
-            return;
-        }
-        if (bEnemyHealthBarVisible)
-        {
-            EnemyHealthBar->SetVisibility(ESlateVisibility::Visible);
-        }
-        PositionInViewport.Y -= 50.f;
-        
-        const FVector2D SizeInViewport(300.f, 25.f);
-        
-        EnemyHealthBar->SetPositionInViewport(PositionInViewport, true);
-        EnemyHealthBar->SetDesiredSizeInViewport(SizeInViewport);
-        
-        
+        return;
     }
+
+    FVector2D PositionInViewport = FVector2D::ZeroVector;
+    if (!ProjectWorldLocationToScreen(EnemyLocation, PositionInViewport))
+    {
+        // The enemy is behind the camera: hide the bar rather than place it from an unset position.
+        EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
+        return;
+    }
+    EnemyHealthBar->SetVisibility(ESlateVisibility::Visible);
+    PositionInViewport.Y -= 50.f;
+
+    const FVector2D SizeInViewport(300.f, 25.f);
+
+    EnemyHealthBar->SetPositionInViewport(PositionInViewport, true);
+    EnemyHealthBar->SetDesiredSizeInViewport(SizeInViewport);
 }
