@@ -53,9 +53,6 @@ public:
 	
 	FORCEINLINE void SetHasCombatTarget(const bool HasTarget) { bHasCombatTarget = HasTarget; }
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	FVector CombatTargetLocation;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Controller")
 	AMainPlayerController* MainPlayerController;
 	

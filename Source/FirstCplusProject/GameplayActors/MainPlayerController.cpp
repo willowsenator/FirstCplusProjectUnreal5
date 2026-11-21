@@ -3,6 +3,8 @@
 
 #include "MainPlayerController.h"
 
+#include "Enemy.h"
+#include "MainCharacter.h"
 #include "Blueprint/UserWidget.h"
 
 void AMainPlayerController::BeginPlay()
@@ -53,6 +55,17 @@ void AMainPlayerController::RemoveEnemyHealthBar()
     }
 }
 
+bool AMainPlayerController::TryGetCombatTargetLocation(FVector& OutLocation) const
+{
+    const AMainCharacter* PlayerCharacter = Cast<AMainCharacter>(GetPawn());
+    if (!PlayerCharacter || !IsValid(PlayerCharacter->CombatTarget))
+    {
+        return false;
+    }
+    OutLocation = PlayerCharacter->CombatTarget->GetActorLocation();
+    return true;
+}
+
 void AMainPlayerController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -62,10 +75,11 @@ void AMainPlayerController::Tick(float DeltaSeconds)
         return;
     }
 
+    FVector TargetLocation = FVector::ZeroVector;
     FVector2D PositionInViewport = FVector2D::ZeroVector;
-    if (!ProjectWorldLocationToScreen(EnemyLocation, PositionInViewport))
+    if (!TryGetCombatTargetLocation(TargetLocation) || !ProjectWorldLocationToScreen(TargetLocation, PositionInViewport))
     {
-        // The enemy is behind the camera: hide the bar rather than place it from an unset position.
+        // No target, or it is behind the camera: hide the bar rather than place it from an unset position.
         EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
         return;
     }

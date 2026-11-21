@@ -32,10 +32,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Widgets")
 	bool bEnemyHealthBarVisible = false;
 	
-	FVector EnemyLocation;
-	
 	void DisplayEnemyHealthBar();
 	void RemoveEnemyHealthBar();
+
+	/** The world location of the player's current combat target; false when there is none. */
+	bool TryGetCombatTargetLocation(FVector& OutLocation) const;
 
 protected:
 	virtual void BeginPlay() override;
