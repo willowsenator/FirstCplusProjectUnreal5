@@ -11,6 +11,9 @@
 # Per-user IDE assistant state
 claudeCodeEditorTabs.xml
 
+# Per-user Rider/ReSharper settings
+*.DotSettings.user
+
 # Solution variants
 *.slnx
 
